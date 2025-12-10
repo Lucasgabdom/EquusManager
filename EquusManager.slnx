@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="EquusManager.API/EquusManager.API.csproj" />
+  <Project Path="EquusManager.Application/EquusManager.Application.csproj" />
+  <Project Path="EquusManager.Domain/EquusManager.Domain.csproj" />
+  <Project Path="EquusManager.Infrastructure/EquusManager.Infrastructure.csproj" />
+</Solution>
