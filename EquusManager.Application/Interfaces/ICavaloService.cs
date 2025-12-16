@@ -9,5 +9,11 @@ namespace EquusManager.Application.Interfaces
     {
         Task<Cavalo> Cadastrar(CriarCavaloDto dto);
         Task<IEnumerable<Cavalo>> ObterTodos();
+        Task<Cavalo?> ObterPorId(int id);
+        Task<bool> Excluir(int id);
+        Task<Cavalo?> Atualizar(int id, CriarCavaloDto dto);
+
+
     }
+
 }

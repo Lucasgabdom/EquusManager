@@ -39,5 +39,40 @@ namespace EquusManager.Infrastructure.Services
             // Vai no banco, pega tudo e transforma em Lista
             return await _context.Cavalos.AsNoTracking().ToListAsync();
         }
+
+        public async Task<Cavalo?> ObterPorId(int id)
+        {
+            // O erro acontece aqui porque falta dizer a tabela
+            return await _context.Cavalos.FindAsync(id);
+        }
+
+        public async Task<bool> Excluir(int id)
+        {
+            var cavalo = await _context.Cavalos.FindAsync(id);
+            if (cavalo == null)
+            {
+                return false;
+            }
+            _context.Cavalos.Remove(cavalo);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<Cavalo?> Atualizar(int id, CriarCavaloDto dto)
+        {
+            var cavaloExiste = await _context.Cavalos.FindAsync(id);
+            if (cavaloExiste == null) return null;
+            cavaloExiste.AtualizarDados(
+                dto.Nome,
+                dto.Raca,
+                dto.DataNascimento,
+                dto.Pelagem,
+                dto.Genero
+                );
+            _context.Cavalos.Update(cavaloExiste);
+            await _context.SaveChangesAsync();
+
+            return cavaloExiste;
+        }
     }
 }

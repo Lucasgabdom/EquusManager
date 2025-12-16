@@ -28,5 +28,16 @@ namespace EquusManager.Domain.Entities
             Pelagem = pelagem;
             Genero = genero;
         }
+
+        //Método para atualizar os dados
+
+        public void AtualizarDados(string nome, string raca, DateTime dataNascimento, string pelagem, string genero)
+        {
+            Nome = nome;
+            Raca = raca;
+            DataNascimento = dataNascimento;
+            Pelagem = pelagem;
+            Genero = genero;
+        }
     }
 }
