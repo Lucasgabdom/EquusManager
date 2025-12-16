@@ -1,13 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace EquusManager.Application
+namespace EquusManager.Application.DTOs
 {
-    internal class CriarCavaloDto
+    public class CriarCavaloDto
     {
+        // Inicializamos com string.Empty para o erro sumir
+        public string Nome { get; set; } = string.Empty;
+        public string Raca { get; set; } = string.Empty;
+        public string Pelagem { get; set; } = string.Empty;
+        public string Genero { get; set; } = string.Empty;
 
+        public DateTime DataNascimento { get; set; }
     }
 }

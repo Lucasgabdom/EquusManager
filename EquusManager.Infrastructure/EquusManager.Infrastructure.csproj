@@ -13,6 +13,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\EquusManager.Domain\EquusManager.Domain.csproj" />
+		<ProjectReference Include="..\EquusManager.Application\EquusManager.Application.csproj" />
 	</ItemGroup>
 
 </Project>

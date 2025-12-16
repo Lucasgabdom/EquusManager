@@ -1,10 +1,12 @@
 using EquusManager.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-// NOVOS USINGS NECESSÁRIOS:
 using EquusManager.Application.Interfaces;
 using EquusManager.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 
 // --- 1. Configuração do Banco ---
 var connectionString = builder.Configuration.GetConnectionString("EquusCs");
