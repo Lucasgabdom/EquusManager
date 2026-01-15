@@ -1,53 +1,55 @@
 import { useState, useEffect } from 'react'
+import CavaloCard from './components/CavaloCard' // <--- Importamos o molde!
 
 function App() {
-  // 1. Criamos uma "gaveta" para guardar os cavalos
   const [cavalos, setCavalos] = useState([])
-  
-  // 2. Criamos uma "gaveta" para guardar erros (se houver)
   const [erro, setErro] = useState(null)
 
-  // 3. useEffect: Roda assim que a tela carrega
   useEffect(() => {
-    // URL da sua API (CONFIRA A PORTA DO SEU SWAGGER AQUI 👇)
+    // Lembre de conferir se a porta 7275 é a correta do seu back-end
     const urlDaApi = 'https://localhost:7275/api/Cavalos'; 
 
     fetch(urlDaApi)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Erro ao buscar dados da API');
-        }
-        return response.json();
+      .then(res => {
+        if (!res.ok) throw new Error('Erro ao buscar dados');
+        return res.json();
       })
-      .then(dados => {
-        console.log("Dados recebidos:", dados); // Para olhar no Console do navegador
-        setCavalos(dados);
-      })
-      .catch(error => {
-        console.error("Deu ruim:", error);
-        setErro(error.message);
-      });
-  }, []) // O array vazio [] diz: "Rode apenas 1 vez no início"
+      .then(dados => setCavalos(dados))
+      .catch(error => setErro(error.message));
+  }, [])
+
+  // Estilo do Container (A "Mesa" onde jogamos as cartas)
+  const gridStyle = {
+    display: 'flex',
+    flexWrap: 'wrap', // Permite que os cards quebrem linha
+    gap: '20px',
+    justifyContent: 'center',
+    padding: '20px'
+  };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial' }}>
-      <h1>🐎 Equus Manager - Plantel</h1>
-      <p>Gerenciamento de Cavalos</p>
+    <div style={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#f4f4f9', minHeight: '100vh' }}>
+      
+      {/* Cabeçalho simples */}
+      <header style={{ backgroundColor: '#2c3e50', color: 'white', padding: '20px', textAlign: 'center' }}>
+        <h1>🐎 Equus Manager</h1>
+      </header>
 
-      {/* Se tiver erro, mostra mensagem vermelha */}
-      {erro && <p style={{ color: 'red' }}>⚠️ {erro}</p>}
+      <main style={{ padding: '20px' }}>
+        {erro && <p style={{ color: 'red', textAlign: 'center' }}>⚠️ {erro}</p>}
 
-      {/* Se a lista estiver vazia e não tiver erro */}
-      {cavalos.length === 0 && !erro && <p>Carregando ou nenhum cavalo encontrado...</p>}
+        {cavalos.length === 0 && !erro && (
+            <p style={{ textAlign: 'center' }}>Nenhum cavalo encontrado...</p>
+        )}
 
-      {/* A Lista de Cavalos */}
-      <ul>
-        {cavalos.map(cavalo => (
-          <li key={cavalo.id} style={{ marginBottom: '10px', border: '1px solid #ccc', padding: '10px' }}>
-            <strong>{cavalo.nome}</strong> - {cavalo.raca} ({cavalo.pelagem})
-          </li>
-        ))}
-      </ul>
+        {/* Aqui usamos o Container Grid */}
+        <div style={gridStyle}>
+          {cavalos.map(cavalo => (
+            // Para cada cavalo, desenhamos um Card
+            <CavaloCard key={cavalo.id} cavalo={cavalo} />
+          ))}
+        </div>
+      </main>
     </div>
   )
 }
