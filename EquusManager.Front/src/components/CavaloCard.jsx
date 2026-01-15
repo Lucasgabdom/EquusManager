@@ -1,7 +1,7 @@
 import React from "react";
 
 // Este componente recebe as "props" (os dados do Cavalo)
-function CavaloCard({ cavalo }) {
+function CavaloCard({ cavalo, onExcluir }) {
 
     // Estilo do Cartão (CSS no JavaScript)
     const cardStyle = {
@@ -47,15 +47,19 @@ function CavaloCard({ cavalo }) {
                 </div>
             </div>
 
-            <button style={{ 
-                marginTop: '15px', 
-                padding: '8px', 
-                backgroundColor: '#e74c3c', 
-                color: 'white', 
-                border: 'none', 
+            <button
+            //A mágica acontece aqui
+            onClick={() => onExcluir(cavalo.id)}
+            style={{
+                marginTop: '15px',
+                padding: '8px',
+                backgroundColor: '#e74c3c',
+                color: 'white',
+                border: 'none',
                 borderRadius: '4px',
-                cursor: 'pointer' 
-            }}>
+                cursor: 'pointer',
+            }}
+            >
                 Excluir
             </button>
         </div>
