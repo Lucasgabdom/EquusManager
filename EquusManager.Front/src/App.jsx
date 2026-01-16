@@ -1,66 +1,78 @@
 import { useState, useEffect } from 'react'
 import CavaloCard from './components/CavaloCard'
-import CavaloForm from './components/CavaloForm' // <--- Importamos o Formulário!
+import CavaloForm from './components/CavaloForm'
 
 function App() {
   const [cavalos, setCavalos] = useState([])
   const [erro, setErro] = useState(null)
+  
+  // Estado para saber quem está sendo editado (null = ninguém)
+  const [cavaloSendoEditado, setCavaloSendoEditado] = useState(null);
 
-  // URL da API
   const urlDaApi = 'https://localhost:7275/api/Cavalos'; 
 
-  // --- BUSCAR (GET) ---
+  // --- GET (Buscar) ---
   useEffect(() => {
     fetch(urlDaApi)
-      .then(res => {
-        if (!res.ok) throw new Error('Erro ao buscar dados');
-        return res.json();
-      })
+      .then(res => { if (!res.ok) throw new Error('Erro ao buscar'); return res.json(); })
       .then(dados => setCavalos(dados))
       .catch(error => setErro(error.message));
   }, [])
 
-  // --- EXCLUIR (DELETE) ---
+  // --- DELETE (Excluir) ---
   const handleExcluir = (id) => {
-    if (!window.confirm("Tem certeza que deseja excluir?")) return;
-
+    if (!window.confirm("Tem certeza?")) return;
     fetch(`${urlDaApi}/${id}`, { method: 'DELETE' })
-      .then(response => {
-        if (response.ok) {
-          setCavalos(cavalos.filter(cavalo => cavalo.id !== id));
-        } else {
-          alert("Erro ao excluir. A API não deixou.");
-        }
-      })
-      .catch(erro => console.error("Erro na exclusão:", erro));
+      .then(res => {
+        if (res.ok) setCavalos(cavalos.filter(c => c.id !== id));
+      });
   }
 
-  // --- NOVO: ADICIONAR (POST) ---
-  const handleAdicionar = (novoCavalo) => {
-    fetch(urlDaApi, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json' // Avisa a API que estamos mandando JSON
-        },
-        body: JSON.stringify(novoCavalo) // Transforma o objeto JS em texto JSON
-    })
-    .then(response => {
-        if (response.ok) {
-            return response.json(); // A API devolve o cavalo criado (com ID novo)
-        } else {
-            throw new Error('Erro ao criar cavalo');
-        }
-    })
-    .then(cavaloCriado => {
-        // Adiciona na lista visualmente (O "..." espalha os antigos e põe o novo no final)
-        setCavalos([...cavalos, cavaloCriado]);
-    })
-    .catch(error => alert("Erro ao salvar: " + error.message));
+  // --- PREPARAR PARA EDITAR ---
+  const handleBotaoEditar = (cavalo) => {
+    setCavaloSendoEditado(cavalo); // Joga o cavalo lá pro formulário
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Sobe a tela suavemente
   }
 
-  const gridStyle = {
-    display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center', padding: '20px'
-  };
+  const handleCancelarEdicao = () => {
+    setCavaloSendoEditado(null);
+  }
+
+  // --- SALVAR (CRIAR ou ATUALIZAR) ---
+  const handleSalvar = (cavaloDados) => {
+    
+    // DECISÃO: Se tem ID, é PUT (Atualizar). Se não tem, é POST (Criar).
+    if (cavaloDados.id) {
+        // --- ATUALIZAR (PUT) ---
+        fetch(`${urlDaApi}/${cavaloDados.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cavaloDados)
+        })
+        .then(res => {
+            if (res.ok) {
+                // Atualiza a lista trocando o antigo pelo novo
+                setCavalos(cavalos.map(c => c.id === cavaloDados.id ? cavaloDados : c));
+                setCavaloSendoEditado(null); // Sai do modo edição
+            } else {
+                alert('Erro ao atualizar!');
+            }
+        });
+
+    } else {
+        // --- CRIAR (POST) ---
+        fetch(urlDaApi, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cavaloDados)
+        })
+        .then(res => res.json())
+        .then(novo => setCavalos([...cavalos, novo]))
+        .catch(err => alert("Erro ao criar"));
+    }
+  }
+
+  const gridStyle = { display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center', padding: '20px' };
 
   return (
     <div style={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#f4f4f9', minHeight: '100vh' }}>
@@ -70,19 +82,24 @@ function App() {
 
       <main style={{ padding: '20px' }}>
         
-        {/* Aqui entra o Formulário novo */}
-        <CavaloForm onAdicionar={handleAdicionar} />
+        {/* Formulário agora recebe o cavalo para editar e a função de cancelar */}
+        <CavaloForm 
+            onAdicionar={handleSalvar} 
+            cavaloEditando={cavaloSendoEditado}
+            onCancelarEdicao={handleCancelarEdicao}
+        />
 
-        <hr style={{ margin: '30px 0', border: '0', borderTop: '1px solid #ccc' }} />
+        <hr style={{ margin: '30px 0', borderTop: '1px solid #ccc' }} />
 
-        {erro && <p style={{ color: 'red', textAlign: 'center' }}>⚠️ {erro}</p>}
+        {cavalos.length === 0 && !erro && <p style={{ textAlign: 'center' }}>Nenhum cavalo cadastrado.</p>}
 
         <div style={gridStyle}>
           {cavalos.map(cavalo => (
             <CavaloCard 
                 key={cavalo.id} 
                 cavalo={cavalo} 
-                onExcluir={handleExcluir} 
+                onExcluir={handleExcluir}
+                onEditar={handleBotaoEditar} // Passamos a nova função
             />
           ))}
         </div>
