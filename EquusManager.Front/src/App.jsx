@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
 import CavaloCard from './components/CavaloCard'
+import CavaloForm from './components/CavaloForm' // <--- Importamos o Formulário!
 
 function App() {
   const [cavalos, setCavalos] = useState([])
   const [erro, setErro] = useState(null)
 
-  // URL da API (Se mudar a porta, mude aqui)
+  // URL da API
   const urlDaApi = 'https://localhost:7275/api/Cavalos'; 
 
+  // --- BUSCAR (GET) ---
   useEffect(() => {
     fetch(urlDaApi)
       .then(res => {
@@ -18,23 +20,42 @@ function App() {
       .catch(error => setErro(error.message));
   }, [])
 
-  // --- NOVA FUNÇÃO: EXCLUIR ---
+  // --- EXCLUIR (DELETE) ---
   const handleExcluir = (id) => {
-    // 1. Pergunta se tem certeza (Segurança básica)
-    if (!window.confirm("Tem certeza que deseja excluir este cavalo?")) return;
+    if (!window.confirm("Tem certeza que deseja excluir?")) return;
 
-    // 2. Manda o DELETE para a API
     fetch(`${urlDaApi}/${id}`, { method: 'DELETE' })
       .then(response => {
         if (response.ok) {
-          // 3. Se deu certo na API, remove da tela instantaneamente
-          // "Filtre a lista e mantenha apenas os cavalos que tem ID DIFERENTE do que eu apaguei"
           setCavalos(cavalos.filter(cavalo => cavalo.id !== id));
         } else {
           alert("Erro ao excluir. A API não deixou.");
         }
       })
       .catch(erro => console.error("Erro na exclusão:", erro));
+  }
+
+  // --- NOVO: ADICIONAR (POST) ---
+  const handleAdicionar = (novoCavalo) => {
+    fetch(urlDaApi, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json' // Avisa a API que estamos mandando JSON
+        },
+        body: JSON.stringify(novoCavalo) // Transforma o objeto JS em texto JSON
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json(); // A API devolve o cavalo criado (com ID novo)
+        } else {
+            throw new Error('Erro ao criar cavalo');
+        }
+    })
+    .then(cavaloCriado => {
+        // Adiciona na lista visualmente (O "..." espalha os antigos e põe o novo no final)
+        setCavalos([...cavalos, cavaloCriado]);
+    })
+    .catch(error => alert("Erro ao salvar: " + error.message));
   }
 
   const gridStyle = {
@@ -48,16 +69,20 @@ function App() {
       </header>
 
       <main style={{ padding: '20px' }}>
+        
+        {/* Aqui entra o Formulário novo */}
+        <CavaloForm onAdicionar={handleAdicionar} />
+
+        <hr style={{ margin: '30px 0', border: '0', borderTop: '1px solid #ccc' }} />
+
         {erro && <p style={{ color: 'red', textAlign: 'center' }}>⚠️ {erro}</p>}
-        {cavalos.length === 0 && !erro && <p style={{ textAlign: 'center' }}>Nenhum cavalo encontrado...</p>}
 
         <div style={gridStyle}>
           {cavalos.map(cavalo => (
-            // PASSAMOS A FUNÇÃO PARA O FILHO AQUI 👇
             <CavaloCard 
                 key={cavalo.id} 
                 cavalo={cavalo} 
-                onExcluir={handleExcluir} // "Toma essa ferramenta, filho"
+                onExcluir={handleExcluir} 
             />
           ))}
         </div>
